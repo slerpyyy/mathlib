@@ -665,6 +665,52 @@ begin
                      ... < ε      : ennreal.mul_lt_of_lt_div hn
 end
 
+/-- Given a set `s` in an emetric space, there always exists a subset `t` which is `ε`-maximally
+separated, i.e., all its points are distant by at least `ε`, and `s` is covered by the balls of
+radius `ε` centered at points of `t`. -/
+lemma exists_maximal_separated_subset (s : set α) {ε : ℝ≥0∞} (hε : 0 < ε) :
+  ∃ (t : set α), t ⊆ s ∧ (s ⊆ ⋃ x ∈ t, ball x ε) ∧ t.pairwise (λ x y, ε ≤ edist x y) :=
+begin
+  let S : set (set α) := {t : set α | t ⊆ s ∧ (∀ (x ∈ t) (y ∈ t), x ≠ y → ε ≤ edist x y)},
+  have : ∃ m ∈ S, ∀ a ∈ S, m ⊆ a → a = m,
+  { apply zorn.zorn_subset,
+    assume c cS hc,
+    refine ⟨⋃₀ c, ⟨sUnion_subset (λ i hi, (cS hi).1), _⟩, λ i hi, subset_sUnion_of_mem hi⟩,
+    rintros x ⟨i, hi, ix⟩ y ⟨j, hj, jy⟩ hxy,
+    rcases hc.total_of_refl hi hj with hij|hij,
+    { exact (cS hj).2 x (hij ix) y jy hxy },
+    { exact (cS hi).2 x ix y (hij jy) hxy } },
+  rcases this with ⟨t, tS, ht⟩,
+  refine ⟨t, tS.1, _, tS.2⟩,
+  assume x hx,
+  contrapose! ht,
+  have xt : x ∉ t,
+  { assume xt,
+    apply ht,
+    refine mem_Union_of_mem x (mem_Union_of_mem xt _),
+    simp only [hε, mem_ball, edist_self] },
+  have A : ∀ y, y ∈ t → ε ≤ edist x y, by simpa using ht,
+  refine ⟨insert x t, ⟨insert_subset.2 ⟨hx, tS.1⟩, _⟩, subset_insert _ _,
+    (ne_insert_of_not_mem _ xt).symm⟩,
+  assume y hy z hz hyz,
+  rcases mem_insert_iff.1 hy with rfl|h'y; rcases mem_insert_iff.1 hz with rfl|h'z,
+  { exact (hyz rfl).elim },
+  { exact A _ h'z },
+  { rw edist_comm, exact A _ h'y },
+  { exact tS.2 y h'y z h'z hyz }
+end
+
+/-- For a set `s` in a pseudo emetric space, if every `ε`-separated subset of `s` is countable,
+then there exists a countable subset `t ⊆ s` that is dense in `s`. -/
+lemma subset_countable_closure_of_countable_separated (s : set α)
+  (hs : ∀ ε > 0, ∀ (t : set α), (∀ (x ∈ t) (y ∈ t), x ≠ y → ε ≤ edist x y) → t ⊆ s → countable t) :
+  ∃ t ⊆ s, (countable t ∧ s ⊆ closure t) :=
+begin
+  apply subset_countable_closure_of_almost_dense_set s (λ ε εpos, _),
+  rcases exists_maximal_separated_subset s εpos with ⟨t, ts, st, ht⟩,
+  exact ⟨t, hs _ εpos _ ht ts, st.trans (bUnion_mono subset.rfl (λ x hx, ball_subset_closed_ball))⟩
+end
+
 /-- A compact set in a pseudo emetric space is separable, i.e., it is a subset of the closure of a
 countable set.  -/
 lemma subset_countable_closure_of_compact {s : set α} (hs : is_compact s) :
@@ -709,6 +755,20 @@ begin
   { rcases hs ε ε0 with ⟨t, htc, ht⟩,
     exact ⟨t, htc, univ_subset_iff.2 ht⟩ }
 end
+
+/-- If every `ε`-separated set in an emetric space `α` is countable, then `α` is second-countable.
+-/
+lemma second_countable_of_countable_separated
+  (hs : ∀ ε > 0, ∀ (t : set α), (∀ (x ∈ t) (y ∈ t), x ≠ y → ε ≤ edist x y) → countable t) :
+  second_countable_topology α :=
+begin
+  apply subset_countable_closure_of_almost_dense_set s (λ ε εpos, _),
+  rcases exists_maximal_separated_subset s εpos with ⟨t, ts, st, ht⟩,
+  exact ⟨t, hs _ εpos _ ht ts, st.trans (bUnion_mono subset.rfl (λ x hx, ball_subset_closed_ball))⟩
+end
+
+#exit
+
 
 end second_countable
 
