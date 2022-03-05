@@ -759,16 +759,14 @@ end
 /-- If every `ε`-separated set in an emetric space `α` is countable, then `α` is second-countable.
 -/
 lemma second_countable_of_countable_separated
-  (hs : ∀ ε > 0, ∀ (t : set α), (∀ (x ∈ t) (y ∈ t), x ≠ y → ε ≤ edist x y) → countable t) :
+  (h : ∀ ε > 0, ∀ (t : set α), (∀ (x ∈ t) (y ∈ t), x ≠ y → ε ≤ edist x y) → countable t) :
   second_countable_topology α :=
 begin
-  apply subset_countable_closure_of_almost_dense_set s (λ ε εpos, _),
-  rcases exists_maximal_separated_subset s εpos with ⟨t, ts, st, ht⟩,
-  exact ⟨t, hs _ εpos _ ht ts, st.trans (bUnion_mono subset.rfl (λ x hx, ball_subset_closed_ball))⟩
+  suffices : separable_space α, by exactI uniform_space.second_countable_of_separable α,
+  rcases subset_countable_closure_of_countable_separated (univ : set α)
+    (λ ε εpos t ht h't, h ε εpos t ht) with ⟨t, -, htc, ht⟩,
+  exact ⟨⟨t, htc, λ x, ht (mem_univ x)⟩⟩
 end
-
-#exit
-
 
 end second_countable
 
