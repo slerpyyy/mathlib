@@ -1769,6 +1769,20 @@ begin
   exact_mod_cast hyx x
 end
 
+/-- If every `ε`-separated set in a metric space `α` is countable, then `α` is second-countable. -/
+lemma second_countable_of_countable_separated
+  (h : ∀ ε > 0, ∀ (t : set α), (∀ (x ∈ t) (y ∈ t), x ≠ y → ε ≤ dist x y) → countable t) :
+  second_countable_topology α :=
+begin
+  refine emetric.second_countable_of_countable_separated (λ ε ε0 t ht, _),
+  rcases ennreal.lt_iff_exists_nnreal_btwn.1 ε0 with ⟨ε', ε'0, ε'ε⟩,
+  apply h ε' (by exact_mod_cast ε'0),
+  assume x hx y hy hne,
+  rw ← ennreal.of_real_le_of_real_iff dist_nonneg,
+  convert le_trans ε'ε.le (ht x hx y hy hne);
+  simp [edist_dist],
+end
+
 end second_countable
 end metric
 
