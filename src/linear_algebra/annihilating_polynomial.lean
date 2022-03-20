@@ -135,8 +135,7 @@ begin
     rw ← h4,
     -- ultimately rely on the fact that our ann_ideal generator
     -- is a multiple of a generator
-    apply is_principal.span_singleton_generator,
-  },
+    apply is_principal.span_singleton_generator, },
 end
 
 /-- The annihilating ideal generator is a member of the annihilating ideal,
@@ -197,7 +196,8 @@ end
 
 /-- sourced from submodule.is_principal.mem_iff_generator_dvd -/
 lemma mem_iff_ann_ideal_generator_dvd (a : A) {x : 𝕜[X]} : x ∈ ann_ideal 𝕜 a ↔ ann_ideal_generator 𝕜 a ∣ x :=
-(mem_iff_eq_smul_ann_ideal_generator 𝕜 a).trans (exists_congr (λ a, by simp only [mul_comm, smul_eq_mul]))
+(mem_iff_eq_smul_ann_ideal_generator 𝕜 a).trans
+ (exists_congr (λ a, by simp only [mul_comm, smul_eq_mul]))
 
 /-- The generator of the annihilating ideal has minimal degree among
  the non-zero members of the annihilating ideal -/
@@ -222,7 +222,7 @@ begin
     exact hpnz (eq_zero_of_zero_dvd hmem), },
   { /- case: generator is not zero -/
     /- 3 conditions for a poly being the minpoly -/
-  apply minpoly.unique,
+    apply minpoly.unique,
   /- 1st condition: the poly is monic -/
   { exact monic_of_ann_ideal_generator 𝕜 a h, },
   /- 2nd condition: the poly annihilates a -/
