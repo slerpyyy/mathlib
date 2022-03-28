@@ -92,6 +92,17 @@ noncomputable def ann_ideal_generator (a : A) : 𝕜[X] :=
 let g := is_principal.generator $ ann_ideal 𝕜 a
   in (C g.leading_coeff⁻¹) * g
 
+lemma span_singleton_ann_ideal_generator' (a : A) :
+  span 𝕜[X] {ann_ideal_generator 𝕜 a} = ann_ideal 𝕜 a :=
+begin
+  simp only [ann_ideal_generator, ann_ideal, alg_hom.to_ring_hom_eq_coe, ideal.submodule_span_eq],
+  rw ideal.span_singleton_mul_left_unit,
+  { exact is_principal.span_singleton_generator _ },
+  { rw [is_unit_C, is_unit_iff_ne_zero],
+    apply inv_ne_zero,
+    rw [ne.def, leading_coeff_eq_zero_iff_deg_eq_bot] },
+end
+
 /-- We get the same span with any invertible constant in front of the generator-/
 lemma span_mul_eq_of_is_unit (g : 𝕜[X]) (c : 𝕜) (hc : is_unit c) :
  span 𝕜[X] ({ g } : set 𝕜[X]) = span 𝕜[X] { (C c) * g } :=
@@ -195,7 +206,8 @@ begin
 end
 
 /-- sourced from submodule.is_principal.mem_iff_generator_dvd -/
-lemma mem_iff_ann_ideal_generator_dvd (a : A) {x : 𝕜[X]} : x ∈ ann_ideal 𝕜 a ↔ ann_ideal_generator 𝕜 a ∣ x :=
+lemma mem_iff_ann_ideal_generator_dvd (a : A) {x : 𝕜[X]} :
+  x ∈ ann_ideal 𝕜 a ↔ ann_ideal_generator 𝕜 a ∣ x :=
 (mem_iff_eq_smul_ann_ideal_generator 𝕜 a).trans
  (exists_congr (λ a, by simp only [mul_comm, smul_eq_mul]))
 
