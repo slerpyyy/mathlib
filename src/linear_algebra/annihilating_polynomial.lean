@@ -7,7 +7,6 @@ import data.polynomial
 import data.polynomial.ring_division
 import ring_theory.principal_ideal_domain
 import algebra.module.linear_map
-import algebra.pointwise
 import field_theory.minpoly
 import linear_algebra
 import ring_theory.ideal.operations
@@ -82,9 +81,6 @@ variable (𝕜)
 
 open submodule
 
--- need • notation for smul on sets
-open_locale pointwise
-
 /-- Since `𝕜[X]` is a principal ideal domain there is a polynomial `g` such that
  `span 𝕜 {g} = ann_ideal a`. This picks some generator.
  We prefer the monic generator of the ideal -/
@@ -92,61 +88,20 @@ noncomputable def ann_ideal_generator (a : A) : 𝕜[X] :=
 let g := is_principal.generator $ ann_ideal 𝕜 a
   in (C g.leading_coeff⁻¹) * g
 
-lemma span_singleton_ann_ideal_generator' (a : A) :
-  span 𝕜[X] {ann_ideal_generator 𝕜 a} = ann_ideal 𝕜 a :=
-begin
-  simp only [ann_ideal_generator, ann_ideal, alg_hom.to_ring_hom_eq_coe, ideal.submodule_span_eq],
-  rw ideal.span_singleton_mul_left_unit,
-  { exact is_principal.span_singleton_generator _ },
-  { rw [is_unit_C, is_unit_iff_ne_zero],
-    apply inv_ne_zero,
-    rw [ne.def, leading_coeff_eq_zero_iff_deg_eq_bot] },
-end
-
-/-- We get the same span with any invertible constant in front of the generator-/
-lemma span_mul_eq_of_is_unit (g : 𝕜[X]) (c : 𝕜) (hc : is_unit c) :
- span 𝕜[X] ({ g } : set 𝕜[X]) = span 𝕜[X] { (C c) * g } :=
-begin
-  have hCc : is_unit (C c) := is_unit.map (C.to_monoid_hom : 𝕜 →* 𝕜[X]) hc,
-  rw ← span_smul_eq_of_is_unit {g} (C c) hCc,
-  congr' 1,
-  unfold has_scalar.smul,
-  rw set.image_singleton,
-end
-
-/-- apply is_principal.span_singleton_generator to the monic generator -/
 lemma span_singleton_ann_ideal_generator (a : A) :
   span 𝕜[X] {ann_ideal_generator 𝕜 a} = ann_ideal 𝕜 a :=
 begin
-  unfold ann_ideal_generator,
-  -- proof is easier with g replacing this big long expression
-  let g := is_principal.generator (ann_ideal 𝕜 a),
-  -- is there a way to define g and substitute it in better than this?
-  have hg : g = is_principal.generator (ann_ideal 𝕜 a), { by refl },
-  rw ← hg,
-  -- simp gets rid of let statement, but puts in ideal.span, we want to keep submodule.span
-  simp, unfold ideal.span,
-  by_cases g = 0,
-  { -- case g = 0
-    rw h, simp, unfold ideal.span,
-    rw span_zero_singleton, apply eq.symm,
-    apply (is_principal.eq_bot_iff_generator_eq_zero _).2,
-    rw ← hg, exact h,  },
-  { -- case g != 0
-    -- leading coeff of g is also not zero
-    have h1 := leading_coeff_ne_zero.2 h,
-    -- working in a field, so non-zero implies cancellable
-    have h2 := mul_inv_cancel h1,
-    -- flip the order to work better with is_unit_of.. below
-    rw mul_comm at h2,
-    -- cancellable implies is_unit
-    have h3 := is_unit_of_mul_eq_one g.leading_coeff⁻¹ g.leading_coeff h2,
-    -- a unit factor does not change the span
-    have h4 := span_mul_eq_of_is_unit 𝕜 g g.leading_coeff⁻¹ h3,
-    rw ← h4,
-    -- ultimately rely on the fact that our ann_ideal generator
-    -- is a multiple of a generator
-    apply is_principal.span_singleton_generator, },
+  by_cases (is_principal.generator $ ann_ideal 𝕜 a) = 0,
+  { rw ← is_principal.eq_bot_iff_generator_eq_zero at h,
+   simp only [ann_ideal_generator, h], simp, rw ← is_principal.eq_bot_iff_generator_eq_zero, },
+  { simp only [ann_ideal_generator, ann_ideal, alg_hom.to_ring_hom_eq_coe, ideal.submodule_span_eq],
+    rw ideal.span_singleton_mul_left_unit,
+    { exact is_principal.span_singleton_generator _ },
+    { rw [is_unit_C, is_unit_iff_ne_zero],
+      apply inv_ne_zero,
+      rw [ne.def, leading_coeff_eq_zero_iff_deg_eq_bot, degree_eq_bot],
+      rw [ann_ideal, alg_hom.to_ring_hom_eq_coe] at h,
+      apply h, }, },
 end
 
 /-- The annihilating ideal generator is a member of the annihilating ideal,
