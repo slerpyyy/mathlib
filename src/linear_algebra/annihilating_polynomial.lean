@@ -40,7 +40,6 @@ there are some common specialiazations which may be more familiar.
 open_locale polynomial
 
 namespace polynomial
-namespace annihilator
 
 section semiring
 
@@ -205,5 +204,4 @@ end
 
 end field
 
-end annihilator
 end polynomial
