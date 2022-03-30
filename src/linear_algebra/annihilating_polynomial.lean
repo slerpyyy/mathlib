@@ -17,14 +17,14 @@ import ring_theory.polynomial_algebra
 
 Given a commutative ring `R` and an `R`-algebra `A`
 Every element `a : A` defines
-an ideal `polynomial.annihilating_ideal a ⊆ R[X]`.
+an ideal `polynomial.ann_ideal a ⊆ R[X]`.
 Simply put, this is the set of polynomials `p` where
 the polynomial evaluation `p(a)` is 0.
 
 ## Special case where the ground ring is a field
 
 In the special case that `R` is a field, we use the notation `R = 𝕜`.
-Here `𝕜[X]` is a PID, so there is a polynomial `g ∈ polynomial.annihilating_ideal a`
+Here `𝕜[X]` is a PID, so there is a polynomial `g ∈ polynomial.ann_ideal a`
 which generates the ideal. We show that if this generator is
 chosen to be monic, then it is the minimal polynomial of `a`,
 as defined in `field_theory.minpoly`.
@@ -175,7 +175,7 @@ degree_le_of_dvd ((mem_iff_ann_ideal_generator_dvd 𝕜 a).1 hp) hpn0
 
 /-- This is what we have been building to:
 The monic generator of the annihilating ideal is the minimal polynomial. -/
-lemma minpoly_eq_monic_annihilating_ideal_generator (a : A) :
+lemma minpoly_eq_monic_ann_ideal_generator (a : A) :
   ann_ideal_generator 𝕜 a = minpoly 𝕜 a :=
 begin
   by_cases (ann_ideal_generator 𝕜 a) = 0,
