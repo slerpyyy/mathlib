@@ -64,6 +64,7 @@ lemma mem_ann_ideal_iff_aeval_eq_zero (a : A) (p : R[X]) :
   p ∈ ann_ideal R a ↔ aeval a p = 0 :=
 iff.rfl
 
+/-- relating ann_ideal to eval₂ -/
 lemma mem_of_eval₂_algebra_map_eq_zero (a : A) (p : R[X]) (h : eval₂ (algebra_map R A) a p = 0) :
   p ∈ ann_ideal R a :=
 begin
@@ -88,6 +89,7 @@ noncomputable def ann_ideal_generator (a : A) : 𝕜[X] :=
 let g := is_principal.generator $ ann_ideal 𝕜 a
   in (C g.leading_coeff⁻¹) * g
 
+/-- ann_ideal_generator 𝕜 a is indeed a generator -/
 lemma span_singleton_ann_ideal_generator (a : A) :
   span 𝕜[X] {ann_ideal_generator 𝕜 a} = ann_ideal 𝕜 a :=
 begin
