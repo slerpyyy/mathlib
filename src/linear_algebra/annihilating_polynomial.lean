@@ -65,8 +65,8 @@ lemma mem_ann_ideal_iff_aeval_eq_zero (a : A) (p : R[X]) :
 iff.rfl
 
 /-- `p ∈ ann_ideal R a` stated using `eval₂`. -/
-lemma mem_ann_ideal_of_eval₂_algebra_map_eq_zero (a : A) (p : R[X]) (h : eval₂ (algebra_map R A) a p = 0) :
-  p ∈ ann_ideal R a :=
+lemma mem_ann_ideal_of_eval₂_algebra_map_eq_zero (a : A) (p : R[X])
+  (h : eval₂ (algebra_map R A) a p = 0) : p ∈ ann_ideal R a :=
 begin
   apply (mem_ann_ideal_iff_aeval_eq_zero a p).2,
   rwa aeval_def,
