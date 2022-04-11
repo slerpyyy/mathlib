@@ -5,6 +5,7 @@ Authors: Justin Thomas
 -/
 import data.polynomial
 import data.polynomial.ring_division
+import data.polynomial.field_division
 import ring_theory.principal_ideal_domain
 import algebra.module.linear_map
 import field_theory.minpoly
@@ -58,18 +59,17 @@ noncomputable def ann_ideal (a : A) : ideal R[X] :=
 variables {R}
 
 /-- It is useful to refer to ideal membership sometimes
- and the annihilation condition other times -/
+ and the annihilation condition other times. -/
 lemma mem_ann_ideal_iff_aeval_eq_zero (a : A) (p : R[X]) :
   p ∈ ann_ideal R a ↔ aeval a p = 0 :=
 iff.rfl
 
-/-- relating ann_ideal to eval₂ -/
-lemma mem_of_eval₂_algebra_map_eq_zero (a : A) (p : R[X]) (h : eval₂ (algebra_map R A) a p = 0) :
+/-- `p ∈ ann_ideal R a` stated using `eval₂`. -/
+lemma mem_ann_ideal_of_eval₂_algebra_map_eq_zero (a : A) (p : R[X]) (h : eval₂ (algebra_map R A) a p = 0) :
   p ∈ ann_ideal R a :=
 begin
   apply (mem_ann_ideal_iff_aeval_eq_zero a p).2,
-  rw aeval_def,
-  apply h,
+  rwa aeval_def,
 end
 
 end semiring
@@ -83,12 +83,12 @@ open submodule
 
 /-- Since `𝕜[X]` is a principal ideal domain there is a polynomial `g` such that
  `span 𝕜 {g} = ann_ideal a`. This picks some generator.
- We prefer the monic generator of the ideal -/
+ We prefer the monic generator of the ideal. -/
 noncomputable def ann_ideal_generator (a : A) : 𝕜[X] :=
 let g := is_principal.generator $ ann_ideal 𝕜 a
   in (C g.leading_coeff⁻¹) * g
 
-/-- ann_ideal_generator 𝕜 a is indeed a generator -/
+/-- `ann_ideal_generator 𝕜 a` is indeed a generator. -/
 lemma span_singleton_ann_ideal_generator (a : A) :
   span 𝕜[X] {ann_ideal_generator 𝕜 a} = ann_ideal 𝕜 a :=
 begin
@@ -125,27 +125,17 @@ begin
   apply @span_singleton_eq_bot 𝕜[X] 𝕜[X] _ _ _ (ann_ideal_generator 𝕜 a),
 end
 
-/-- The obvious scaling of a non-zero polynomial gives a monic polynomial.
- This can be moved to another file, since it does not use anything about ann_ideal. -/
-lemma mul_monic_of_ne_zero (g : 𝕜[X]) (hg : g ≠ 0) : monic ((C g.leading_coeff⁻¹) * g) :=
-begin
-  unfold monic,
-  rw leading_coeff_mul (C g.leading_coeff⁻¹) g,
-  rw leading_coeff_C g.leading_coeff⁻¹,
-  rw mul_comm,
-  rw mul_inv_cancel,
-  apply leading_coeff_ne_zero.2 hg,
-end
-
-/-- The generator we chose for the annihilating ideal is monic when the ideal is non-zero -/
+/-- The generator we chose for the annihilating ideal is monic when the ideal is non-zero. -/
 lemma monic_of_ann_ideal_generator (a : A) (hg : (ann_ideal_generator 𝕜 a : 𝕜[X]) ≠ 0) :
   monic (ann_ideal_generator 𝕜 a : 𝕜[X]) :=
 begin
-  unfold ann_ideal_generator,
-  simp,
+  dunfold ann_ideal_generator,
+  dsimp *,
+  rw mul_comm,
   have hg' : is_principal.generator (ann_ideal 𝕜 a) ≠ 0,
   { unfold ann_ideal_generator at hg, simp at hg, exact hg, },
-  apply mul_monic_of_ne_zero 𝕜 (is_principal.generator (ann_ideal 𝕜 a)) hg',
+  apply polynomial.monic_mul_leading_coeff_inv,
+  apply hg',
 end
 
 /-- We are working toward showing the generator of the annihilating ideal
@@ -158,7 +148,7 @@ begin
   have hg : aeval a (is_principal.generator (ann_ideal 𝕜 a)) = 0,
   { have gen_member := submodule.is_principal.generator_mem (ann_ideal 𝕜 a),
     exact (ring_hom.mem_ker (polynomial.aeval a).to_ring_hom).1 gen_member, },
-  rw ann_ideal_generator, simp, rw hg, simp,
+  rw ann_ideal_generator, simp *,
 end
 
 /-- sourced from submodule.is_principal.mem_iff_generator_dvd -/
@@ -185,7 +175,7 @@ begin
     by_contra hi, cases hi with p hp,
     have hpnz : p ≠ 0, { apply monic.ne_zero hp.left, },
     have hmem : p ∈ ann_ideal 𝕜 a,
-    { exact mem_of_eval₂_algebra_map_eq_zero a p hp.right },
+    { exact mem_ann_ideal_of_eval₂_algebra_map_eq_zero a p hp.right },
     rw [mem_iff_ann_ideal_generator_dvd 𝕜 a, h] at hmem,
     exact hpnz (eq_zero_of_zero_dvd hmem), },
   { /- case: generator is not zero -/
